@@ -5,10 +5,25 @@ from django.contrib import admin
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-# Optional: small inline views (keeps things simple)
+# Inline API views (simple and self-contained)
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def index(_request):
+    return Response({
+        "message": "Django API is running",
+        "endpoints": {
+            "admin": "/admin/",
+            "token_obtain_pair (POST)": "/api/token/",
+            "token_refresh (POST)": "/api/token/refresh/",
+            "me (GET, Bearer token)": "/api/me/",
+            "healthz (GET)": "/healthz",
+        },
+    })
 
 
 @api_view(["GET"])
@@ -20,7 +35,6 @@ def healthz(_request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def me(request):
-    # Returns the current authenticated user
     user = request.user
     return Response({
         "username": user.get_username(),
@@ -30,6 +44,10 @@ def me(request):
 
 
 urlpatterns = [
+    # Index / API root
+    path("", index, name="index"),
+
+    # Admin
     path("admin/", admin.site.urls),
 
     # JWT auth (SimpleJWT)
