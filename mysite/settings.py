@@ -1,6 +1,6 @@
 """
-Django settings for mysite project (Railway + React CORS/CSRF ready)
-Works with Django 5.x (CSRF wildcards); compatible with 4.x if you keep explicit domains.
+Django settings for mysite project (Railway + React CORS/CSRF + JWT)
+Django 5.x
 """
 
 import os
@@ -34,12 +34,12 @@ ALLOWED_HOSTS = env_list(
     ],
 )
 
-# CSRF: include scheme; on Django 5+, wildcard domains (like *.vercel.app) are allowed.
+# CSRF: include scheme. Django 5+ allows wildcard entries like *.vercel.app.
 CSRF_TRUSTED_ORIGINS = env_list(
     "DJANGO_CSRF_TRUSTED_ORIGINS",
     [
         "https://server-production-3fc4.up.railway.app",
-        "https://*.vercel.app",     # Django 5+; if on 4.x, replace with exact Vercel URLs
+        "https://*.vercel.app",     # if you’re on Django 5+. On 4.x, list exact hosts instead.
         "http://localhost:3000",
     ],
 )
@@ -61,8 +61,18 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "corsheaders",  # CORS
+
+    # Third-party
+    "corsheaders",
+    "rest_framework",
 ]
+
+# ---------- DRF / Auth ----------
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+}
 
 # ---------- Middleware ----------
 MIDDLEWARE = [
@@ -138,19 +148,19 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CORS_ALLOWED_ORIGINS = env_list(
     "DJANGO_CORS_ALLOWED_ORIGINS",
     [
-        # your Vercel deployment(s) — add your current prod/preview URL(s) here without trailing slash
-        "https://frontend-react-django-8f5da9j3f-mrgbpjpygmailcoms-projects.vercel.app"
+        # Add your current Vercel prod/preview URL(s) here (no trailing slash)
+        "https://frontend-react-django-8f5da9j3f-mrgbpjpygmailcoms-projects.vercel.app",
+        "http://localhost:3000",
     ],
 )
 
-# Allow any preview under your Vercel scope (more future-proof)
+# Allow any preview under your Vercel scope (future-proof)
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https://.*-mrgbpjpygmailcoms-projects\.vercel\.app$",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
-
-# If you need to explicitly allow custom headers:
-# from corsheaders.defaults import default_headers
+# If you need extra headers/methods, you can uncomment and extend:
+# from corsheaders.defaults import default_headers, default_methods
 # CORS_ALLOW_HEADERS = list(default_headers) + ["Authorization", "X-CSRFToken"]
-# CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+# CORS_ALLOW_METHODS = list(default_methods) + ["PATCH"]
