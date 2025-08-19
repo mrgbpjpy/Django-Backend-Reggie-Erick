@@ -139,8 +139,7 @@ CORS_ALLOWED_ORIGINS = env_list(
     "DJANGO_CORS_ALLOWED_ORIGINS",
     [
         # your Vercel deployment(s) — add your current prod/preview URL(s) here without trailing slash
-        "https://frontend-react-django-8f5da9j3f-mrgbpjpygmailcoms-projects.vercel.app",
-        "http://localhost:3000",
+        "https://frontend-react-django-8f5da9j3f-mrgbpjpygmailcoms-projects.vercel.app"
     ],
 )
 
