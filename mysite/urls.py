@@ -36,8 +36,10 @@ def healthz(_request):
 @permission_classes([IsAuthenticated])
 def me(request):
     user = request.user
+    username = user.get_username()
     return Response({
-        "username": user.get_username(),
+        "message": f"{username} is authenticated.",
+        "username": username,
         "is_superuser": user.is_superuser,
         "is_staff": user.is_staff,
     })
