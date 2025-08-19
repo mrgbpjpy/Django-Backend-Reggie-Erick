@@ -30,7 +30,10 @@ ALLOWED_HOSTS = ["*"]
 
 # FORM SUBMISSION
 # Comment out the following line and place your railway URL, and your production URL in the array.
-# CSRF_TRUSTED_ORIGINS = ["*"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://server-production-3fc4.up.railway.app",
+    "https://*.railway.app",     # Django 4/5 supports wildcard here
+]
 
 # Application definition
 
