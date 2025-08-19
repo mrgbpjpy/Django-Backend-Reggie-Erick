@@ -143,7 +143,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CORS_ALLOWED_ORIGINS = env_list(
     "DJANGO_CORS_ALLOWED_ORIGINS",
     [
-        "https://frontend-mu-two-39.vercel.app",  # <<< UPDATE (your React frontend)
+        "https://frontend-react-django-8f5da9j3f-mrgbpjpygmailcoms-projects.vercel.app/",  # <<< UPDATE (your React frontend)
         "http://localhost:3000",
     ],
 )
