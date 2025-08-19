@@ -1,6 +1,6 @@
 """
 Django settings for mysite project (Railway + React CORS/CSRF ready)
-Django 4.0.4
+Works with Django 5.x (CSRF wildcards); compatible with 4.x if you keep explicit domains.
 """
 
 import os
@@ -24,34 +24,32 @@ SECRET_KEY = os.getenv(
 )
 DEBUG = env_bool("DJANGO_DEBUG", True)
 
-# Be explicit in production (avoid "*")
 ALLOWED_HOSTS = env_list(
     "DJANGO_ALLOWED_HOSTS",
     [
-        "server-production-3fc4.up.railway.app",  # <<< UPDATE (your Railway URL)
+        "server-production-3fc4.up.railway.app",  # your Railway domain
+        ".railway.app",                           # any Railway subdomain (optional)
         "localhost",
         "127.0.0.1",
     ],
 )
 
-# CSRF: must include scheme (https://). Django 4.0.x does NOT support wildcards here.
+# CSRF: include scheme; on Django 5+, wildcard domains (like *.vercel.app) are allowed.
 CSRF_TRUSTED_ORIGINS = env_list(
     "DJANGO_CSRF_TRUSTED_ORIGINS",
     [
-        "https://server-production-3fc4.up.railway.app",  # <<< UPDATE (your Railway URL)
-        "https://frontend-mu-two-39.vercel.app",          # <<< UPDATE (your React frontend)
+        "https://server-production-3fc4.up.railway.app",
+        "https://*.vercel.app",     # Django 5+; if on 4.x, replace with exact Vercel URLs
         "http://localhost:3000",
     ],
 )
 
-# Tell Django it’s behind Railway’s proxy so request.is_secure() works
+# Behind Railway's proxy
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-# Secure cookies for HTTPS
+# Secure cookie settings (recommended in prod)
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
-
-# If your React app uses Django session auth across domains, SameSite must be None
 CSRF_COOKIE_SAMESITE = "None"
 SESSION_COOKIE_SAMESITE = "None"
 
@@ -63,21 +61,18 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
-    # CORS
-    "corsheaders",
+    "corsheaders",  # CORS
 ]
 
 # ---------- Middleware ----------
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",          # keep directly after Security
+    "whitenoise.middleware.WhiteNoiseMiddleware",     # keep right after Security
     "django.contrib.sessions.middleware.SessionMiddleware",
 
-    # CORS must be before CommonMiddleware
-    "corsheaders.middleware.CorsMiddleware",
-
+    "corsheaders.middleware.CorsMiddleware",          # CORS BEFORE CommonMiddleware
     "django.middleware.common.CommonMiddleware",
+
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -139,14 +134,24 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # ---------- CORS (React) ----------
-# Frontend origins that may call your API (must include scheme)
+# Exact origins (NO trailing slash)
 CORS_ALLOWED_ORIGINS = env_list(
     "DJANGO_CORS_ALLOWED_ORIGINS",
     [
-        "https://frontend-react-django-8f5da9j3f-mrgbpjpygmailcoms-projects.vercel.app/",  # <<< UPDATE (your React frontend)
+        # your Vercel deployment(s) — add your current prod/preview URL(s) here without trailing slash
+        "https://frontend-react-django-8f5da9j3f-mrgbpjpygmailcoms-projects.vercel.app",
         "http://localhost:3000",
     ],
 )
+
+# Allow any preview under your Vercel scope (more future-proof)
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*-mrgbpjpygmailcoms-projects\.vercel\.app$",
+]
+
 CORS_ALLOW_CREDENTIALS = True
-# If you need extra headers: from corsheaders.defaults import default_headers
-# CORS_ALLOW_HEADERS = list(default_headers) + ["X-CSRFToken", "Authorization"]
+
+# If you need to explicitly allow custom headers:
+# from corsheaders.defaults import default_headers
+# CORS_ALLOW_HEADERS = list(default_headers) + ["Authorization", "X-CSRFToken"]
+# CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
